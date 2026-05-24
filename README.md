@@ -8,6 +8,34 @@ Built with vanilla HTML, CSS, and JavaScript — zero dependencies, no build ste
 
 ---
 
+## Screenshots
+
+### Currency Converter
+
+Convert between EUR, USD, and BRL with live rates fetched from multiple sources.
+
+<p align="center">
+  <img src="screenshots/currency-converter.png" alt="Currency Converter" width="700" />
+</p>
+
+### Compound Interest Calculator
+
+Calculate investment growth with Brazilian CDI/SELIC rates, complete with multi-currency projections and an interactive chart.
+
+<p align="center">
+  <img src="screenshots/compound-interest.png" alt="Compound Interest Calculator" width="700" />
+</p>
+
+### Quick Reference Table
+
+Instant conversion lookup for common EUR amounts across all three currencies.
+
+<p align="center">
+  <img src="screenshots/quick-reference.png" alt="Quick Reference Table" width="500" />
+</p>
+
+---
+
 ## Features
 
 ### 💱 Currency Converter
@@ -67,17 +95,47 @@ A modern web browser — that's it. No Node.js, no package manager, no build too
 
 ---
 
+## Usage
+
+### Converting Currencies
+
+1. Open the app — the **Currency Converter** tab is active by default.
+2. Type an amount into **any** of the three currency fields (EUR, USD, or BRL).
+3. The other two fields update automatically with the converted amounts.
+4. Current exchange rates are displayed below the converter, along with the data sources.
+5. Scroll down to see the **Quick Reference** table for common EUR conversion amounts.
+
+### Calculating Compound Interest
+
+1. Click the **Compound Interest** tab in the header.
+2. Enter your **Initial Investment** (in R$) and an optional **Monthly Contribution**.
+3. Set the **Annual Interest Rate**, or click the **CDI** or **SELIC** buttons to auto-fill the current Brazilian benchmark rate.
+4. Choose the **Period** (years or months) and **Compounding Frequency** (daily, monthly, quarterly, semi-annually, or annually).
+5. *(Optional)* Expand the **Currency Analysis** section to:
+   - **Projection mode** — set expected annual BRL depreciation/appreciation vs USD and EUR.
+   - **Historical mode** — select a start date to use real historical exchange rates.
+6. Click **Calculate** to see:
+   - A results summary showing Total Value, Total Invested, Interest Earned, and Effective Rate — all with USD and EUR equivalents.
+   - A line chart comparing your total contributions vs portfolio balance over time.
+   - A detailed monthly breakdown table.
+
+---
+
 ## Project Structure
 
 ```
 converter/
-├── index.html   # Page structure and layout
-├── style.css    # Dark glassmorphism design system
-├── app.js       # All application logic (API calls, calculations, chart)
-└── README.md    # This file
+├── index.html          # Page structure and layout
+├── style.css           # Dark glassmorphism design system
+├── app.js              # All application logic (API calls, calculations, chart)
+├── screenshots/        # README screenshots
+│   ├── currency-converter.png
+│   ├── compound-interest.png
+│   └── quick-reference.png
+└── README.md           # This file
 ```
 
-No frameworks, no bundlers, no transpilers — just three files.
+No frameworks, no bundlers, no transpilers — just three source files.
 
 ---
 
