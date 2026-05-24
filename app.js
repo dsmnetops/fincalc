@@ -66,6 +66,7 @@
 
   let currentMode = 'projection'; // 'projection' or 'historical'
   const historicalRatesCache = {}; // keyed by 'YYYY-MM-DD'
+  let currentChartPoints = []; // for tooltip
 
   let lastRateAutoInfo = null;
 
@@ -881,6 +882,7 @@
     const chartH = H - pad.top - pad.bottom;
 
     ctx.clearRect(0, 0, W, H);
+    currentChartPoints = [];
 
     if (data.length < 2) return;
 
@@ -994,10 +996,19 @@
     for (let i = 0; i < totalPts; i++) {
       if (i % dotStep !== 0 && i !== totalPts - 1) continue;
       const xp = xAt(i);
+      const yContrib = yAt(data[i].contributions);
+      const yBal = yAt(data[i].balance);
+
+      currentChartPoints.push({
+        x: xp,
+        yContrib: yContrib,
+        yBalance: yBal,
+        data: data[i]
+      });
 
       // Contribution dot
       ctx.beginPath();
-      ctx.arc(xp, yAt(data[i].contributions), dotRadius, 0, Math.PI * 2);
+      ctx.arc(xp, yContrib, dotRadius, 0, Math.PI * 2);
       ctx.fillStyle = '#4338ca';
       ctx.fill();
       ctx.strokeStyle = '#6366f1';
@@ -1006,7 +1017,7 @@
 
       // Balance dot
       ctx.beginPath();
-      ctx.arc(xp, yAt(data[i].balance), dotRadius, 0, Math.PI * 2);
+      ctx.arc(xp, yBal, dotRadius, 0, Math.PI * 2);
       ctx.fillStyle = '#059669';
       ctx.fill();
       ctx.strokeStyle = '#10b981';
@@ -1052,6 +1063,57 @@
     if (n >= 1e3) return (n / 1e3).toFixed(0) + 'K';
     return n.toFixed(0);
   }
+
+  // ──────────────────────── CHART INTERACTIVITY ────────────────────────
+  
+  const tooltip = $('#chart-tooltip');
+  const ciChart = $('#ci-chart');
+
+  ciChart.addEventListener('mousemove', (e) => {
+    if (!currentChartPoints.length) {
+      tooltip.classList.add('hidden');
+      return;
+    }
+
+    const rect = ciChart.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+
+    let closest = currentChartPoints[0];
+    let minD = Math.abs(x - closest.x);
+
+    for (const pt of currentChartPoints) {
+      const d = Math.abs(x - pt.x);
+      if (d < minD) {
+        minD = d;
+        closest = pt;
+      }
+    }
+
+    if (minD < 20) {
+      tooltip.classList.remove('hidden');
+      const t = TRANSLATIONS[currentLang];
+      tooltip.innerHTML = `
+        <div class="chart-tooltip-period">${closest.data.period}</div>
+        <div class="chart-tooltip-val invested">
+          <span>${t.chartInvested}:</span>
+          <span>${formatBRL(closest.data.contributions)}</span>
+        </div>
+        <div class="chart-tooltip-val balance">
+          <span>${t.chartBalance}:</span>
+          <span>${formatBRL(closest.data.balance)}</span>
+        </div>
+      `;
+      tooltip.style.left = closest.x + 'px';
+      // hover slightly above the balance point
+      tooltip.style.top = Math.min(closest.yBalance, closest.yContrib) + 'px';
+    } else {
+      tooltip.classList.add('hidden');
+    }
+  });
+
+  ciChart.addEventListener('mouseleave', () => {
+    tooltip.classList.add('hidden');
+  });
 
   // ──────────────────────── INIT ────────────────────────
 

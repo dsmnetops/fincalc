@@ -220,6 +220,62 @@ main {
 }
 
 /* ===== CONVERTER SECTION ===== */
+.chart-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 24px;
+}
+
+#ci-chart {
+  display: block;
+  min-width: 600px;
+}
+
+.chart-tooltip {
+  position: absolute;
+  background: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: var(--text-main);
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 10;
+  transform: translate(-50%, -100%);
+  margin-top: -10px;
+  white-space: nowrap;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+  opacity: 1;
+}
+
+.chart-tooltip.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chart-tooltip-period {
+  font-weight: 600;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.chart-tooltip-val {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.chart-tooltip-val.invested {
+  color: var(--accent-purple);
+}
+
+.chart-tooltip-val.balance {
+  color: var(--accent-green);
+}
+
 .converter-card {
   margin-bottom: 24px;
 }
