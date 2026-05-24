@@ -30,8 +30,9 @@
       <span>FinCalc</span>
     </div>
     <nav>
-      <a href="#converter" class="nav-link active" data-section="converter">Currency Converter</a>
-      <a href="#interest" class="nav-link" data-section="interest">Compound Interest</a>
+      <button class="nav-btn active" data-section="converter">Currency Converter</button>
+      <button class="nav-btn" data-section="interest">Compound Interest</button>
+      <button class="nav-btn" data-section="stocks">Stock Market</button>
     </nav>
     <button class="lang-toggle" id="lang-toggle" title="Mudar para Português" aria-label="Switch language">
       <span id="lang-flag">🇧🇷</span>
@@ -363,6 +364,126 @@
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== STOCK MARKET SECTION ==================== -->
+    <section id="stocks" class="section hidden">
+      <div class="section-header">
+        <h1>Stock Market</h1>
+        <p class="subtitle">Track indices and simulate stock portfolios</p>
+      </div>
+
+      <!-- Module A: Market Tracker -->
+      <div class="stocks-tracker-grid" id="market-tracker-grid">
+        <!-- populated by JS -->
+        <div class="tracker-card skeleton"></div>
+        <div class="tracker-card skeleton"></div>
+        <div class="tracker-card skeleton"></div>
+        <div class="tracker-card skeleton"></div>
+      </div>
+
+      <div class="stocks-layout">
+        <!-- Module B: Portfolio Simulator -->
+        <div class="stocks-module glass-card">
+          <h2>Portfolio Simulator</h2>
+          <p class="hint">Simulate a stock holding and convert its value to multiple currencies instantly.</p>
+          
+          <div class="input-row-2col">
+            <div class="input-group">
+              <label for="stock-sim-symbol">Stock Symbol (e.g. ANET)</label>
+              <input type="text" id="stock-sim-symbol" placeholder="ANET">
+            </div>
+            <div class="input-group">
+              <label for="stock-sim-shares">Number of Shares</label>
+              <input type="number" id="stock-sim-shares" value="10" min="0" step="any">
+            </div>
+          </div>
+
+          <button id="btn-simulate-portfolio" class="calculate-btn">
+            <span id="stock-sim-calc-text">Calculate Value</span>
+          </button>
+
+          <div class="stock-sim-results hidden" id="stock-sim-results">
+            <div class="result-item result-total">
+              <span class="result-label" id="stock-sim-name">...</span>
+              <span class="result-value" id="stock-sim-usd">$ 0.00</span>
+              <div class="result-currencies">
+                <span class="result-currency" id="stock-sim-eur"><span class="cur-flag">🇪🇺</span> —</span>
+                <span class="result-currency" id="stock-sim-brl"><span class="cur-flag">🇧🇷</span> —</span>
+              </div>
+            </div>
+            <p class="sim-note">Based on live price: <span id="stock-sim-price">$0.00</span> per share.</p>
+          </div>
+        </div>
+
+        <!-- Module C: Investment Comparison -->
+        <div class="stocks-module glass-card">
+          <h2>Investment Comparison</h2>
+          <p class="hint">Compare holding stocks (estimated growth) vs selling and investing in fixed interest.</p>
+          
+          <div class="input-group">
+            <label for="comp-amount">Initial Amount (USD)</label>
+            <div class="input-with-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="comp-amount" value="1000" min="0" step="any">
+            </div>
+          </div>
+
+          <div class="input-row-2col">
+            <div class="input-group">
+              <label for="comp-stock-growth">Estimated Stock Growth (%/yr)</label>
+              <div class="input-with-prefix">
+                <span class="prefix">%</span>
+                <input type="number" id="comp-stock-growth" value="10" step="0.5">
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="comp-interest">Interest Rate (%/yr)</label>
+              <div class="rate-input-row">
+                <input type="number" id="comp-interest" value="13.25" min="0" step="0.01">
+                <div class="rate-buttons" style="flex-wrap: wrap;">
+                  <button class="rate-preset-btn" id="comp-btn-cdi" title="Use current CDI rate">
+                    <span class="btn-label">CDI</span>
+                  </button>
+                  <button class="rate-preset-btn" id="comp-btn-selic" title="Use current SELIC rate">
+                    <span class="btn-label">SELIC</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="comp-period">Time Horizon (Years)</label>
+            <input type="number" id="comp-period" value="5" min="1" step="1">
+          </div>
+
+          <button id="btn-compare-investments" class="calculate-btn">
+            <span id="comp-calc-text">Compare Strategies</span>
+          </button>
+
+          <div class="comp-results hidden" id="comp-results">
+            <div class="comp-cards-grid">
+              <!-- Stock Strategy -->
+              <div class="comp-card">
+                <h3>Keep Stocks</h3>
+                <div class="comp-val primary" id="comp-stock-usd">$0.00</div>
+                <div class="comp-val secondary" id="comp-stock-eur"><span class="cur-flag">🇪🇺</span> —</div>
+                <div class="comp-val secondary" id="comp-stock-brl"><span class="cur-flag">🇧🇷</span> —</div>
+              </div>
+              
+              <!-- Interest Strategy -->
+              <div class="comp-card">
+                <h3>Fixed Interest</h3>
+                <div class="comp-val primary" id="comp-interest-usd">$0.00</div>
+                <div class="comp-val secondary" id="comp-interest-eur"><span class="cur-flag">🇪🇺</span> —</div>
+                <div class="comp-val secondary" id="comp-interest-brl"><span class="cur-flag">🇧🇷</span> —</div>
+              </div>
+            </div>
+            <div class="comp-verdict" id="comp-verdict"></div>
           </div>
         </div>
       </div>

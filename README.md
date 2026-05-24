@@ -49,47 +49,32 @@ Instant conversion lookup for common EUR amounts across all three currencies.
 - Link to [Revolut's converter](https://www.revolut.com/currency-converter/) for cross-referencing.
 
 ### 📈 Compound Interest Calculator
+- **Currency Converter**: Convert between USD, EUR, and BRL using real-time data from Fawaz Ahmed's Exchange API.
+- **Compound Interest Calculator**: Calculate future value of investments with monthly contributions.
+  - **Live Exchange Rates**: Uses the current USD/EUR rates to project equivalent value in other currencies.
+  - **Historical Mode**: Select a start date in the past, and it automatically fetches the real historical exchange rates for every month since that date.
+  - **Real Interest Rate**: Option to deduct Brazilian inflation (IPCA) directly from the nominal rate.
+- **Stock Market Module**:
+  - **Live Tracker**: Monitor major indices (NASDAQ, S&P 500, Dow Jones) and specific stocks (e.g., ANET) with live prices via Yahoo Finance.
+  - **Portfolio Simulator**: Input a stock symbol and number of shares to instantly see its total value in USD, EUR, and BRL.
+  - **Strategy Comparison**: Compare the projected growth of holding a stock vs selling it and investing the cash in Brazilian fixed-income instruments like CDI or SELIC.
+- **Live Brazilian Rates (BCB)**: Pulls the latest CDI, SELIC, and IPCA inflation rates directly from the Banco Central do Brasil API.
+- **Bilingual Support**: Toggle between English and Portuguese instantly.
 
-- Configurable **initial investment**, **monthly contribution**, **annual rate**, **period**, and **compounding frequency** (daily → annually).
-- **One-click CDI & SELIC presets** — rates are fetched live from the [Banco Central do Brasil (BCB) API](https://www.bcb.gov.br/) and annualised from daily values.
-- **Currency Analysis** panel with two modes:
-  - **Projection** — set expected annual BRL change against USD/EUR and see projected balances in foreign currencies.
-  - **Historical** — fetches real month-by-month exchange rates and shows what your investment would have been worth in USD/EUR at each point in time.
-- **Results summary** — Total Value, Total Invested, Interest Earned, and Effective Rate, all displayed in BRL, USD, and EUR.
-- **Interactive line chart** (pure `<canvas>`, no charting library) plotting Invested vs Balance over time.
-- **Monthly breakdown table** with per-period contributions, interest, and balances in all three currencies.
+## Installation & Setup
 
----
-
-## Getting Started
-
-### Prerequisites
-
-- A modern web browser (Chrome, Firefox, Safari, Edge)
-- [Python 3](https://www.python.org/) (pre-installed on macOS and most Linux distros)
-
-No Node.js, no package manager, no build tools required.
-
-### Running Locally
-
-1. **Clone the repository:**
-
+1. **Clone the repository**:
    ```bash
    git clone https://github.com/dsmnetops/fincalc.git
    cd fincalc
    ```
 
-2. **Start a local server:**
-
+2. **Run Locally**:
+   Since FinCalc is a static, dependency-free application, you just need a simple local web server to run it. If you have Python installed, you can start the server in your terminal:
    ```bash
-   python3 -m http.server 8000
+   python3 -m http.server 8888
    ```
-
-3. **Open in your browser:**
-
-   ```
-   http://localhost:8000
-   ```
+   Then open your browser and navigate to `http://localhost:8888`.
 
 > **Note:** The app fetches live data from external APIs, so an internet connection is required for the first load. Cached rates will work offline for up to 1 hour.
 

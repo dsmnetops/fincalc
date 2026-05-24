@@ -64,6 +64,32 @@
   const historicalStatus = $('#historical-status');
   const historicalStatusText = $('#historical-status-text');
 
+  // Stocks
+  const stockSimSymbol = $('#stock-sim-symbol');
+  const stockSimShares = $('#stock-sim-shares');
+  const btnSimulatePortfolio = $('#btn-simulate-portfolio');
+  const stockSimResults = $('#stock-sim-results');
+  const stockSimName = $('#stock-sim-name');
+  const stockSimUsd = $('#stock-sim-usd');
+  const stockSimEur = $('#stock-sim-eur');
+  const stockSimBrl = $('#stock-sim-brl');
+  const stockSimPrice = $('#stock-sim-price');
+
+  const compAmount = $('#comp-amount');
+  const compStockGrowth = $('#comp-stock-growth');
+  const compInterest = $('#comp-interest');
+  const compPeriod = $('#comp-period');
+  const btnCompareInvestments = $('#btn-compare-investments');
+  const compResults = $('#comp-results');
+  
+  const compStockUsd = $('#comp-stock-usd');
+  const compStockEur = $('#comp-stock-eur');
+  const compStockBrl = $('#comp-stock-brl');
+  const compInterestUsd = $('#comp-interest-usd');
+  const compInterestEur = $('#comp-interest-eur');
+  const compInterestBrl = $('#comp-interest-brl');
+  const compVerdict = $('#comp-verdict');
+
   let currentMode = 'projection'; // 'projection' or 'historical'
   const historicalRatesCache = {}; // keyed by 'YYYY-MM-DD'
   let currentChartPoints = []; // for tooltip
@@ -134,6 +160,29 @@
         `Using <span id="rate-auto-name">${name}</span> rate: <span id="rate-auto-value">${value}</span>% (updated <span id="rate-auto-date">${date}</span>)`,
       fetchingMonthsMsg: (n) => `Fetching rates for ${n} months…`,
       fetchedMonthsMsg: (done, total) => `Fetched ${done} of ${total} months…`,
+      
+      navStocks: 'Stock Market',
+      stocksTitle: 'Stock Market',
+      stocksSubtitle: 'Track indices and simulate stock portfolios',
+      modulePortfolioTitle: 'Portfolio Simulator',
+      modulePortfolioHint: 'Simulate a stock holding and convert its value to multiple currencies instantly.',
+      labelStockSymbol: 'Stock Symbol (e.g. ANET)',
+      labelNumShares: 'Number of Shares',
+      btnCalcValue: 'Calculate Value',
+      simNoteLive: 'Based on live price:',
+      simNotePerShare: 'per share',
+      moduleCompTitle: 'Investment Comparison',
+      moduleCompHint: 'Compare holding stocks (estimated growth) vs selling and investing in fixed interest.',
+      labelInitialAmount: 'Initial Amount (USD)',
+      labelStockGrowth: 'Estimated Stock Growth (%/yr)',
+      labelCompPeriod: 'Time Horizon (Years)',
+      btnCompare: 'Compare Strategies',
+      compCardStock: 'Keep Stocks',
+      compCardInterest: 'Fixed Interest',
+      verdictStock: (diff) => `Keeping stocks is better by <span class="cur-flag">🇺🇸</span> $${diff}`,
+      verdictInterest: (diff) => `Fixed interest is better by <span class="cur-flag">🇺🇸</span> $${diff}`,
+      verdictTie: 'Both strategies yield the same result.',
+
       langToggleTitle: 'Mudar para Português',
       langLabel: 'PT',
       langFlag: '🇧🇷',
@@ -198,6 +247,29 @@
         `Usando taxa <span id="rate-auto-name">${name}</span>: <span id="rate-auto-value">${value}</span>% (atualizado em <span id="rate-auto-date">${date}</span>)`,
       fetchingMonthsMsg: (n) => `Buscando taxas para ${n} meses…`,
       fetchedMonthsMsg: (done, total) => `Buscado ${done} de ${total} meses…`,
+
+      navStocks: 'Mercado de Ações',
+      stocksTitle: 'Mercado de Ações',
+      stocksSubtitle: 'Acompanhe índices e simule portfólios',
+      modulePortfolioTitle: 'Simulador de Portfólio',
+      modulePortfolioHint: 'Simule um ativo e converta seu valor para múltiplas moedas instantaneamente.',
+      labelStockSymbol: 'Símbolo (ex. ANET)',
+      labelNumShares: 'Número de Ações',
+      btnCalcValue: 'Calcular Valor',
+      simNoteLive: 'Baseado no preço ao vivo:',
+      simNotePerShare: 'por ação',
+      moduleCompTitle: 'Comparação de Investimento',
+      moduleCompHint: 'Compare manter ações (crescimento estimado) vs vender e investir em renda fixa.',
+      labelInitialAmount: 'Valor Inicial (USD)',
+      labelStockGrowth: 'Cresc. Estimado da Ação (%/ano)',
+      labelCompPeriod: 'Horizonte de Tempo (Anos)',
+      btnCompare: 'Comparar Estratégias',
+      compCardStock: 'Manter Ações',
+      compCardInterest: 'Renda Fixa',
+      verdictStock: (diff) => `Manter ações é melhor em <span class="cur-flag">🇺🇸</span> $${diff}`,
+      verdictInterest: (diff) => `Renda fixa é melhor em <span class="cur-flag">🇺🇸</span> $${diff}`,
+      verdictTie: 'Ambas as estratégias rendem o mesmo.',
+
       langToggleTitle: 'Switch to English',
       langLabel: 'EN',
       langFlag: '🇬🇧',
@@ -222,6 +294,7 @@
     // Nav
     $('[data-section="converter"]').textContent = t.navConverter;
     $('[data-section="interest"]').textContent = t.navInterest;
+    $('[data-section="stocks"]').textContent = t.navStocks;
 
     // Converter
     $('#converter .section-header h1').textContent = t.converterTitle;
@@ -248,6 +321,7 @@
     $('label[for="ci-fx-usd"]').textContent = t.labelFxUsd;
     $('label[for="ci-fx-eur"]').textContent = t.labelFxEur;
     $('label[for="ci-start-date"]').textContent = t.labelStartDate;
+    $('#calculate-text').textContent = t.btnCalculate;
 
     // Select options
     const pu = $('#ci-period-unit');
@@ -260,21 +334,16 @@
     cf.options[3].textContent = t.optSemiAnnually;
     cf.options[4].textContent = t.optAnnually;
 
-    // Buttons & hints
-    $('#currency-analysis-text').textContent = t.currencyAnalysis;
     $('#mode-projection-text').textContent = t.modeProjection;
     $('#mode-historical-text').textContent = t.modeHistorical;
-    $('#calculate-text').textContent = t.btnCalculate;
     $('#mode-projection .projection-hint').textContent = t.projectionHint;
     $('#mode-historical .projection-hint').textContent = t.historicalHint;
 
-    // Results
-    $('#ci-total').previousElementSibling.textContent = t.resultTotal;
-    $('#ci-invested').previousElementSibling.textContent = t.resultInvested;
-    $('#ci-earnings').previousElementSibling.textContent = t.resultEarnings;
-    $('#ci-effective').previousElementSibling.textContent = t.resultEffective;
+    $('#ci-results-summary .result-total .result-label').textContent = t.resultTotal;
+    $('#ci-results-summary .result-invested .result-label').textContent = t.resultInvested;
+    $('#ci-results-summary .result-earnings .result-label').textContent = t.resultEarnings;
+    $('#ci-results-summary .result-effective .result-label').textContent = t.resultEffective;
 
-    // Breakdown table
     $('.breakdown-table-wrapper h3').textContent = t.monthlyBreakdown;
     const ths = $$('#ci-breakdown-table th');
     if (ths.length >= 6) {
@@ -284,6 +353,34 @@
       ths[3].textContent = t.thBalance;
       ths[4].textContent = t.thUsdBalance;
       ths[5].textContent = t.thEurBalance;
+    }
+
+    // Stocks
+    $('#stocks .section-header h1').textContent = t.stocksTitle;
+    $('#stocks .section-header .subtitle').textContent = t.stocksSubtitle;
+    $('#stocks .stocks-module:nth-child(1) h2').textContent = t.modulePortfolioTitle;
+    $('#stocks .stocks-module:nth-child(1) .hint').textContent = t.modulePortfolioHint;
+    $('label[for="stock-sim-symbol"]').textContent = t.labelStockSymbol;
+    $('label[for="stock-sim-shares"]').textContent = t.labelNumShares;
+    $('#stock-sim-calc-text').textContent = t.btnCalcValue;
+    
+    const simNote = $('#stocks .stocks-module:nth-child(1) .sim-note');
+    if (simNote && simNote.childNodes.length > 0) {
+      simNote.childNodes[0].textContent = t.simNoteLive + ' ';
+      if(simNote.childNodes[2]) simNote.childNodes[2].textContent = ' ' + t.simNotePerShare + '.';
+    }
+
+    $('#stocks .stocks-module:nth-child(2) h2').textContent = t.moduleCompTitle;
+    $('#stocks .stocks-module:nth-child(2) .hint').textContent = t.moduleCompHint;
+    $('label[for="comp-amount"]').textContent = t.labelInitialAmount;
+    $('label[for="comp-stock-growth"]').textContent = t.labelStockGrowth;
+    $('label[for="comp-period"]').textContent = t.labelCompPeriod;
+    $('#comp-calc-text').textContent = t.btnCompare;
+    
+    const compCards = $$('#comp-results .comp-card h3');
+    if(compCards.length === 2) {
+      compCards[0].textContent = t.compCardStock;
+      compCards[1].textContent = t.compCardInterest;
     }
 
     // Rate auto info (re-render if visible)
@@ -304,12 +401,12 @@
   }
 
   // ──────────────────────── NAV ────────────────────────
-  $$('.nav-link').forEach((link) => {
-    link.addEventListener('click', (e) => {
+  $$('.nav-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
       e.preventDefault();
-      const target = link.dataset.section;
-      $$('.nav-link').forEach((l) => l.classList.remove('active'));
-      link.classList.add('active');
+      const target = btn.dataset.section;
+      $$('.nav-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
       $$('.section').forEach((s) => s.classList.remove('active'));
       $(`#${target}`).classList.add('active');
       // Re-draw chart when interest section becomes visible
@@ -1111,6 +1208,191 @@
     }
   });
 
+  // ──────────────────────── STOCK MARKET ────────────────────────
+
+  const STOCK_PROXY_URL = 'https://api.allorigins.win/get?url=';
+  
+  async function fetchStockQuote(symbol) {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`;
+    try {
+      const res = await fetch(STOCK_PROXY_URL + encodeURIComponent(url));
+      const data = await res.json();
+      if (data && data.contents) {
+        const parsed = JSON.parse(data.contents);
+        const meta = parsed.chart.result[0].meta;
+        return {
+          price: meta.regularMarketPrice,
+          prevClose: meta.chartPreviousClose || meta.previousClose,
+          currency: meta.currency,
+          symbol: meta.symbol,
+          name: meta.shortName || meta.longName || symbol
+        };
+      }
+    } catch (e) {
+      console.error('Error fetching stock quote for', symbol, e);
+    }
+    return null;
+  }
+
+  const stockCache = {};
+
+  async function getStockQuote(symbol) {
+    const s = symbol.toUpperCase();
+    if (stockCache[s] && Date.now() - stockCache[s].timestamp < 60000) {
+      return stockCache[s].data;
+    }
+    const data = await fetchStockQuote(s);
+    if (data) {
+      stockCache[s] = { data, timestamp: Date.now() };
+    }
+    return data;
+  }
+
+  async function renderMarketTracker() {
+    const grid = $('#market-tracker-grid');
+    if (!grid) return;
+    const symbols = ['^IXIC', '^DJI', '^GSPC', 'ANET'];
+    const names = {
+      '^IXIC': 'NASDAQ',
+      '^DJI': 'Dow Jones',
+      '^GSPC': 'S&P 500',
+      'ANET': 'Arista Net'
+    };
+
+    grid.innerHTML = symbols.map(() => `<div class="tracker-card skeleton"></div>`).join('');
+
+    const htmls = [];
+    for (const sym of symbols) {
+      const data = await getStockQuote(sym);
+      if (data) {
+        const diff = data.price - data.prevClose;
+        const pct = (diff / data.prevClose) * 100;
+        const sign = diff >= 0 ? '+' : '';
+        const cls = diff >= 0 ? 'positive' : 'negative';
+        
+        let eurPrice = '—', brlPrice = '—';
+        if (exchangeRates && exchangeRates.usd) {
+           const valEur = data.price * exchangeRates.usd.eur;
+           const valBrl = data.price * exchangeRates.usd.brl;
+           eurPrice = '€' + valEur.toFixed(2);
+           brlPrice = 'R$' + valBrl.toFixed(2);
+        }
+
+        htmls.push(`
+          <div class="tracker-card">
+            <div class="tracker-header">
+              <span class="tracker-symbol">${names[sym] || sym}</span>
+              <span class="tracker-price">$${data.price.toFixed(2)}</span>
+            </div>
+            <div class="tracker-change ${cls}">
+              ${sign}${diff.toFixed(2)} (${sign}${pct.toFixed(2)}%)
+            </div>
+            <div class="tracker-currencies">
+              <span>${eurPrice}</span>
+              <span>${brlPrice}</span>
+            </div>
+          </div>
+        `);
+      } else {
+        htmls.push(`
+          <div class="tracker-card">
+            <div class="tracker-header">
+              <span class="tracker-symbol">${names[sym] || sym}</span>
+              <span class="tracker-price">Error</span>
+            </div>
+          </div>
+        `);
+      }
+    }
+    grid.innerHTML = htmls.join('');
+  }
+
+  if (btnSimulatePortfolio) {
+    btnSimulatePortfolio.addEventListener('click', async () => {
+      const symbol = stockSimSymbol.value.trim() || 'ANET';
+      const shares = parseFloat(stockSimShares.value) || 0;
+      
+      const stockSimCalcText = $('#stock-sim-calc-text');
+      stockSimCalcText.textContent = '...';
+      const data = await getStockQuote(symbol);
+      stockSimCalcText.textContent = TRANSLATIONS[currentLang].btnCalcValue;
+
+      if (data) {
+        const totalUsd = data.price * shares;
+        let totalEur = 0, totalBrl = 0;
+        
+        if (exchangeRates && exchangeRates.usd) {
+          totalEur = totalUsd * exchangeRates.usd.eur;
+          totalBrl = totalUsd * exchangeRates.usd.brl;
+        }
+        
+        stockSimName.textContent = `${shares}x ${data.name || symbol}`;
+        stockSimPrice.textContent = `$${data.price.toFixed(2)}`;
+        stockSimUsd.textContent = `$${formatUSD(totalUsd).replace('$', '')}`;
+        stockSimEur.innerHTML = `<span class="cur-flag">🇪🇺</span> €${formatEUR(totalEur).replace('€', '')}`;
+        stockSimBrl.innerHTML = `<span class="cur-flag">🇧🇷</span> R$${formatBRL(totalBrl).replace('R$', '')}`;
+        
+        stockSimResults.classList.remove('hidden');
+      }
+    });
+  }
+
+  if (btnCompareInvestments) {
+    btnCompareInvestments.addEventListener('click', () => {
+      const amount = parseFloat(compAmount.value) || 0;
+      const stockGrowth = (parseFloat(compStockGrowth.value) || 0) / 100;
+      const interestRate = (parseFloat(compInterest.value) || 0) / 100;
+      const years = parseFloat(compPeriod.value) || 0;
+
+      const futureStockUsd = amount * Math.pow(1 + stockGrowth, years);
+      const futureInterestUsd = amount * Math.pow(1 + interestRate, years);
+
+      let stockEur = 0, stockBrl = 0;
+      let interestEur = 0, interestBrl = 0;
+      if (exchangeRates && exchangeRates.usd) {
+        stockEur = futureStockUsd * exchangeRates.usd.eur;
+        stockBrl = futureStockUsd * exchangeRates.usd.brl;
+        interestEur = futureInterestUsd * exchangeRates.usd.eur;
+        interestBrl = futureInterestUsd * exchangeRates.usd.brl;
+      }
+
+      compStockUsd.textContent = `$${formatUSD(futureStockUsd).replace('$', '')}`;
+      compStockEur.innerHTML = `<span class="cur-flag">🇪🇺</span> €${formatEUR(stockEur).replace('€', '')}`;
+      compStockBrl.innerHTML = `<span class="cur-flag">🇧🇷</span> R$${formatBRL(stockBrl).replace('R$', '')}`;
+
+      compInterestUsd.textContent = `$${formatUSD(futureInterestUsd).replace('$', '')}`;
+      compInterestEur.innerHTML = `<span class="cur-flag">🇪🇺</span> €${formatEUR(interestEur).replace('€', '')}`;
+      compInterestBrl.innerHTML = `<span class="cur-flag">🇧🇷</span> R$${formatBRL(interestBrl).replace('R$', '')}`;
+
+      const diff = futureStockUsd - futureInterestUsd;
+      const t = TRANSLATIONS[currentLang];
+      
+      compVerdict.className = 'comp-verdict'; // reset
+      if (Math.abs(diff) < 0.01) {
+        compVerdict.innerHTML = t.verdictTie;
+        compVerdict.style.color = 'var(--text-main)';
+        compVerdict.style.background = 'var(--surface-light)';
+      } else if (diff > 0) {
+        compVerdict.innerHTML = t.verdictStock(formatUSD(diff).replace('$', ''));
+        compVerdict.style.color = 'var(--accent-green)';
+        compVerdict.style.background = 'rgba(16, 185, 129, 0.1)';
+      } else {
+        compVerdict.innerHTML = t.verdictInterest(formatUSD(Math.abs(diff)).replace('$', ''));
+        compVerdict.style.color = 'var(--accent-blue)';
+        compVerdict.style.background = 'rgba(59, 130, 246, 0.1)';
+      }
+
+      compResults.classList.remove('hidden');
+    });
+
+    $('#comp-btn-cdi').addEventListener('click', () => {
+      if (cdiRate) compInterest.value = cdiRate.annualised.toFixed(2);
+    });
+    $('#comp-btn-selic').addEventListener('click', () => {
+      if (selicRate) compInterest.value = selicRate.annualised.toFixed(2);
+    });
+  }
+
   ciChart.addEventListener('mouseleave', () => {
     tooltip.classList.add('hidden');
   });
@@ -1135,5 +1417,6 @@
   loadRates();
   loadBrazilianRates();
   calculateCompoundInterest();
+  renderMarketTracker();
   applyLanguage(currentLang);
 })();
