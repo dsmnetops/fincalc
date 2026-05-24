@@ -582,6 +582,12 @@ tr:hover td {
   transform: translateY(-1px);
 }
 
+.rate-preset-btn.active {
+  background: var(--accent-green);
+  color: #fff;
+  border-color: var(--accent-green);
+}
+
 .rate-preset-btn .btn-label {
   font-size: 0.65rem;
   font-weight: 700;

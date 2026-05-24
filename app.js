@@ -535,18 +535,33 @@
     if (!cdiRate) return;
     ciRate.value = cdiRate.annualised.toFixed(2);
     showRateAutoInfo('CDI', cdiRate.annualised.toFixed(2), cdiRate.date);
+    calculateCompoundInterest();
   });
 
   $('#btn-selic').addEventListener('click', () => {
     if (!selicRate) return;
     ciRate.value = selicRate.annualised.toFixed(2);
     showRateAutoInfo('SELIC', selicRate.annualised.toFixed(2), selicRate.date);
+    calculateCompoundInterest();
   });
 
   $('#btn-ipca').addEventListener('click', () => {
     if (!ipcaRate) return;
-    ciInflation.value = ipcaRate.annualised.toFixed(2);
-    // Don't show rate auto info for inflation, to avoid overriding the interest rate info
+    const currentVal = parseFloat(ciInflation.value) || 0;
+    const ipcaVal = parseFloat(ipcaRate.annualised.toFixed(2));
+
+    if (Math.abs(currentVal - ipcaVal) < 0.01) {
+      ciInflation.value = "0";
+      $('#btn-ipca').classList.remove('active');
+    } else {
+      ciInflation.value = ipcaRate.annualised.toFixed(2);
+      $('#btn-ipca').classList.add('active');
+    }
+    calculateCompoundInterest();
+  });
+
+  ciInflation.addEventListener('input', () => {
+    $('#btn-ipca').classList.remove('active');
   });
 
   function showRateAutoInfo(name, value, date) {
