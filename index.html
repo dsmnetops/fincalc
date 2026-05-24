@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <div class="bg-glow bg-glow-1"></div>
@@ -30,9 +30,9 @@
       <span>FinCalc</span>
     </div>
     <nav>
-      <button class="nav-btn active" data-section="converter">Currency Converter</button>
-      <button class="nav-btn" data-section="interest">Compound Interest</button>
-      <button class="nav-btn" data-section="stocks">Stock Market</button>
+      <a href="#converter" class="nav-link active" data-section="converter">Currency Converter</a>
+      <a href="#interest" class="nav-link" data-section="interest">Compound Interest</a>
+      <a href="#stocks" class="nav-link" data-section="stocks">Stock Market</a>
     </nav>
     <button class="lang-toggle" id="lang-toggle" title="Mudar para Português" aria-label="Switch language">
       <span id="lang-flag">🇧🇷</span>
@@ -312,7 +312,7 @@
                 <span class="result-currency" id="ci-total-eur"><span class="cur-flag">🇪🇺</span> —</span>
               </div>
             </div>
-            <div class="result-item">
+            <div class="result-item result-invested">
               <span class="result-label">Total Invested</span>
               <span class="result-value" id="ci-invested">R$ 0.00</span>
               <div class="result-currencies" id="ci-invested-currencies">
@@ -328,7 +328,7 @@
                 <span class="result-currency" id="ci-earnings-eur"><span class="cur-flag">🇪🇺</span> —</span>
               </div>
             </div>
-            <div class="result-item">
+            <div class="result-item result-effective">
               <span class="result-label">Effective Rate</span>
               <span class="result-value" id="ci-effective">0.00%</span>
             </div>
@@ -494,6 +494,6 @@
     <p id="footer-text">Rates are for informational purposes only. <a href="https://www.revolut.com/currency-converter/" target="_blank" rel="noopener noreferrer">Revolut Converter</a> · Data from <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noopener noreferrer">fawazahmed0</a> & <a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener noreferrer">ExchangeRate-API</a> · CDI/SELIC from <a href="https://www.bcb.gov.br/" target="_blank" rel="noopener noreferrer">BCB</a></p>
   </footer>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
