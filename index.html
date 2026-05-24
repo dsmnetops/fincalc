@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Currency Converter & Interest Calculator</title>
+  <meta name="description" content="Convert between EUR, USD and BRL with live exchange rates. Calculate compound interest with auto-updated Brazilian CDI and SELIC rates.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  <div class="bg-glow bg-glow-3"></div>
+
+  <header>
+    <div class="logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="14" stroke="url(#logo-grad)" stroke-width="2.5"/>
+        <path d="M10 16h12M16 10v12" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32">
+            <stop stop-color="#6C63FF"/>
+            <stop offset="1" stop-color="#3B82F6"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span>FinCalc</span>
+    </div>
+    <nav>
+      <a href="#converter" class="nav-link active" data-section="converter">Currency Converter</a>
+      <a href="#interest" class="nav-link" data-section="interest">Compound Interest</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ==================== CURRENCY CONVERTER ==================== -->
+    <section id="converter" class="section active">
+      <div class="section-header">
+        <h1>Currency Converter</h1>
+        <p class="subtitle">Live exchange rates from trusted sources</p>
+      </div>
+
+      <div class="converter-card glass-card">
+        <div class="converter-tri">
+          <div class="currency-row" data-currency="eur">
+            <div class="currency-flag-label">
+              <span class="currency-flag">🇪🇺</span>
+              <div class="currency-name-wrap">
+                <span class="currency-code">EUR</span>
+                <span class="currency-name">Euro</span>
+              </div>
+            </div>
+            <input type="number" id="amount-eur" class="currency-amount" value="1000" min="0" step="any" placeholder="0.00">
+          </div>
+
+          <div class="currency-row" data-currency="usd">
+            <div class="currency-flag-label">
+              <span class="currency-flag">🇺🇸</span>
+              <div class="currency-name-wrap">
+                <span class="currency-code">USD</span>
+                <span class="currency-name">US Dollar</span>
+              </div>
+            </div>
+            <input type="number" id="amount-usd" class="currency-amount" value="" min="0" step="any" placeholder="0.00">
+          </div>
+
+          <div class="currency-row" data-currency="brl">
+            <div class="currency-flag-label">
+              <span class="currency-flag">🇧🇷</span>
+              <div class="currency-name-wrap">
+                <span class="currency-code">BRL</span>
+                <span class="currency-name">Brazilian Real</span>
+              </div>
+            </div>
+            <input type="number" id="amount-brl" class="currency-amount" value="" min="0" step="any" placeholder="0.00">
+          </div>
+        </div>
+
+        <div class="rate-display">
+          <div id="rate-loading" class="rate-loading">
+            <div class="spinner"></div>
+            <span>Fetching live rates…</span>
+          </div>
+          <div id="rate-info" class="rate-info hidden">
+            <div class="rate-badges-grid">
+              <div class="rate-badge">
+                <span class="rate-label">EUR → USD</span>
+                <span class="rate-value" id="rate-eur-usd">—</span>
+              </div>
+              <div class="rate-badge">
+                <span class="rate-label">EUR → BRL</span>
+                <span class="rate-value" id="rate-eur-brl">—</span>
+              </div>
+              <div class="rate-badge">
+                <span class="rate-label">USD → BRL</span>
+                <span class="rate-value" id="rate-usd-brl">—</span>
+              </div>
+            </div>
+            <div class="rate-sources">
+              <span class="rate-source">Sources: fawazahmed0 · ExchangeRate-API</span>
+            </div>
+          </div>
+          <div id="rate-updated" class="rate-updated hidden">
+            Last updated: <span id="rate-timestamp">—</span>
+          </div>
+        </div>
+
+        <div class="revolut-link">
+          <a href="https://www.revolut.com/currency-converter/" target="_blank" rel="noopener noreferrer" id="revolut-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            Compare on Revolut
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick conversion table -->
+      <div class="quick-table glass-card">
+        <h2>Quick Reference</h2>
+        <div class="table-wrapper">
+          <table id="quick-table">
+            <thead>
+              <tr>
+                <th>🇪🇺 EUR</th>
+                <th>🇺🇸 USD</th>
+                <th>🇧🇷 BRL</th>
+              </tr>
+            </thead>
+            <tbody id="quick-table-body">
+              <!-- populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== COMPOUND INTEREST ==================== -->
+    <section id="interest" class="section">
+      <div class="section-header">
+        <h1>Compound Interest Calculator</h1>
+        <p class="subtitle">Calculate growth with Brazilian CDI & SELIC rates</p>
+      </div>
+
+      <div class="interest-layout">
+        <div class="interest-inputs glass-card">
+          <div class="input-group">
+            <label for="ci-principal">Initial Investment</label>
+            <div class="input-with-prefix">
+              <span class="prefix">R$</span>
+              <input type="number" id="ci-principal" value="10000" min="0" step="any">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="ci-monthly">Monthly Contribution</label>
+            <div class="input-with-prefix">
+              <span class="prefix">R$</span>
+              <input type="number" id="ci-monthly" value="500" min="0" step="any">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="ci-rate">Annual Interest Rate (%)</label>
+            <div class="rate-input-row">
+              <input type="number" id="ci-rate" value="13.25" min="0" max="100" step="0.01">
+              <div class="rate-buttons">
+                <button class="rate-preset-btn" id="btn-cdi" title="Use current CDI rate">
+                  <span class="btn-label">CDI</span>
+                  <span class="btn-rate" id="btn-cdi-rate">…</span>
+                </button>
+                <button class="rate-preset-btn" id="btn-selic" title="Use current SELIC rate">
+                  <span class="btn-label">SELIC</span>
+                  <span class="btn-rate" id="btn-selic-rate">…</span>
+                </button>
+              </div>
+            </div>
+            <div id="rate-auto-info" class="rate-auto-info hidden">
+              Using <span id="rate-auto-name">—</span> rate: <span id="rate-auto-value">—</span>% (updated <span id="rate-auto-date">—</span>)
+            </div>
+          </div>
+
+          <div class="input-row-2col">
+            <div class="input-group">
+              <label for="ci-period">Period</label>
+              <input type="number" id="ci-period" value="5" min="1" max="100" step="1">
+            </div>
+            <div class="input-group">
+              <label for="ci-period-unit">Unit</label>
+              <select id="ci-period-unit">
+                <option value="years">Years</option>
+                <option value="months">Months</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="ci-compound">Compounding Frequency</label>
+            <select id="ci-compound">
+              <option value="365">Daily</option>
+              <option value="12" selected>Monthly</option>
+              <option value="4">Quarterly</option>
+              <option value="2">Semi-annually</option>
+              <option value="1">Annually</option>
+            </select>
+          </div>
+
+          <div class="projection-section">
+            <button type="button" class="projection-toggle" id="projection-toggle">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                <polyline points="17 6 23 6 23 12"/>
+              </svg>
+              Currency Analysis
+              <span class="toggle-chevron" id="toggle-chevron">▸</span>
+            </button>
+            <div class="projection-panel hidden" id="projection-panel">
+              <div class="mode-toggle" id="mode-toggle">
+                <button type="button" class="mode-btn active" data-mode="projection">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                  Projection
+                </button>
+                <button type="button" class="mode-btn" data-mode="historical">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Historical
+                </button>
+              </div>
+
+              <!-- Projection mode inputs -->
+              <div class="mode-panel" id="mode-projection">
+                <p class="projection-hint">Set expected annual BRL change against other currencies. Negative = BRL weakens, Positive = BRL strengthens.</p>
+                <div class="input-row-2col">
+                  <div class="input-group">
+                    <label for="ci-fx-usd">🇺🇸 BRL vs USD (%/yr)</label>
+                    <div class="input-with-prefix">
+                      <span class="prefix">%</span>
+                      <input type="number" id="ci-fx-usd" value="0" step="0.5" min="-50" max="50">
+                    </div>
+                  </div>
+                  <div class="input-group">
+                    <label for="ci-fx-eur">🇪🇺 BRL vs EUR (%/yr)</label>
+                    <div class="input-with-prefix">
+                      <span class="prefix">%</span>
+                      <input type="number" id="ci-fx-eur" value="0" step="0.5" min="-50" max="50">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Historical mode inputs -->
+              <div class="mode-panel hidden" id="mode-historical">
+                <p class="projection-hint">Use real historical exchange rates. Pick when your investment started — rates are fetched automatically for each month.</p>
+                <div class="input-group">
+                  <label for="ci-start-date">Investment Start Date</label>
+                  <input type="month" id="ci-start-date" value="2025-01" class="date-input">
+                </div>
+                <div id="historical-status" class="historical-status hidden">
+                  <div class="spinner small-spinner"></div>
+                  <span id="historical-status-text">Fetching historical rates…</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button id="ci-calculate" class="calculate-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="2" width="16" height="20" rx="2"/>
+              <line x1="8" y1="6" x2="16" y2="6"/>
+              <line x1="16" y1="14" x2="16" y2="18"/>
+              <line x1="8" y1="10" x2="8" y2="10.01"/>
+              <line x1="12" y1="10" x2="12" y2="10.01"/>
+              <line x1="16" y1="10" x2="16" y2="10.01"/>
+              <line x1="8" y1="14" x2="8" y2="14.01"/>
+              <line x1="12" y1="14" x2="12" y2="14.01"/>
+              <line x1="8" y1="18" x2="8" y2="18.01"/>
+              <line x1="12" y1="18" x2="12" y2="18.01"/>
+            </svg>
+            Calculate
+          </button>
+        </div>
+
+        <div class="interest-results glass-card">
+          <div class="results-summary" id="ci-results-summary">
+            <div class="result-item result-total">
+              <span class="result-label">Total Value</span>
+              <span class="result-value" id="ci-total">R$ 0.00</span>
+              <div class="result-currencies" id="ci-total-currencies">
+                <span class="result-currency" id="ci-total-usd"><span class="cur-flag">🇺🇸</span> —</span>
+                <span class="result-currency" id="ci-total-eur"><span class="cur-flag">🇪🇺</span> —</span>
+              </div>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Total Invested</span>
+              <span class="result-value" id="ci-invested">R$ 0.00</span>
+              <div class="result-currencies" id="ci-invested-currencies">
+                <span class="result-currency" id="ci-invested-usd"><span class="cur-flag">🇺🇸</span> —</span>
+                <span class="result-currency" id="ci-invested-eur"><span class="cur-flag">🇪🇺</span> —</span>
+              </div>
+            </div>
+            <div class="result-item result-earnings">
+              <span class="result-label">Interest Earned</span>
+              <span class="result-value" id="ci-earnings">R$ 0.00</span>
+              <div class="result-currencies" id="ci-earnings-currencies">
+                <span class="result-currency" id="ci-earnings-usd"><span class="cur-flag">🇺🇸</span> —</span>
+                <span class="result-currency" id="ci-earnings-eur"><span class="cur-flag">🇪🇺</span> —</span>
+              </div>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Effective Rate</span>
+              <span class="result-value" id="ci-effective">0.00%</span>
+            </div>
+          </div>
+
+          <div id="ci-rates-note" class="ci-rates-note hidden">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>Currency conversions use live exchange rates from the Currency Converter tab.</span>
+          </div>
+
+          <!-- Chart area -->
+          <div class="chart-container">
+            <canvas id="ci-chart" width="600" height="300"></canvas>
+          </div>
+
+          <div class="breakdown-table-wrapper">
+            <h3>Monthly Breakdown</h3>
+            <div class="table-wrapper">
+              <table id="ci-breakdown-table">
+                <thead>
+                  <tr>
+                    <th>Period</th>
+                    <th>🇧🇷 Contributions</th>
+                    <th>🇧🇷 Interest</th>
+                    <th>🇧🇷 Balance</th>
+                    <th class="col-usd">🇺🇸 Balance</th>
+                    <th class="col-eur">🇪🇺 Balance</th>
+                  </tr>
+                </thead>
+                <tbody id="ci-breakdown-body">
+                  <!-- populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Rates are for informational purposes only. <a href="https://www.revolut.com/currency-converter/" target="_blank" rel="noopener noreferrer">Revolut Converter</a> · Data from <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noopener noreferrer">fawazahmed0</a> & <a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener noreferrer">ExchangeRate-API</a> · CDI/SELIC from <a href="https://www.bcb.gov.br/" target="_blank" rel="noopener noreferrer">BCB</a></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
