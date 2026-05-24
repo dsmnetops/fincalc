@@ -65,31 +65,31 @@ Instant conversion lookup for common EUR amounts across all three currencies.
 
 ### Prerequisites
 
-A modern web browser — that's it. No Node.js, no package manager, no build tools required.
+- A modern web browser (Chrome, Firefox, Safari, Edge)
+- [Python 3](https://www.python.org/) (pre-installed on macOS and most Linux distros)
+
+No Node.js, no package manager, no build tools required.
 
 ### Running Locally
 
 1. **Clone the repository:**
 
    ```bash
-   git clone <your-remote-url>
-   cd converter
+   git clone https://github.com/dsmnetops/fincalc.git
+   cd fincalc
    ```
 
-2. **Open in browser** — either:
+2. **Start a local server:**
 
-   - Double-click `index.html` to open directly, or
-   - Serve with any static file server:
+   ```bash
+   python3 -m http.server 8000
+   ```
 
-     ```bash
-     # Python
-     python3 -m http.server 8000
+3. **Open in your browser:**
 
-     # Node.js (if available)
-     npx serve .
-     ```
-
-3. **Navigate to** `http://localhost:8000` (if using a server).
+   ```
+   http://localhost:8000
+   ```
 
 > **Note:** The app fetches live data from external APIs, so an internet connection is required for the first load. Cached rates will work offline for up to 1 hour.
 
