@@ -23,12 +23,14 @@
 
   const BCB_CDI = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.12/dados/ultimos/1?formato=json';
   const BCB_SELIC = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.11/dados/ultimos/1?formato=json';
+  const BCB_IPCA = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.13522/dados/ultimos/1?formato=json';
 
   // ──────────────────────── STATE ────────────────────────
   let ratesPrimary = {};   // { eur: { usd: ..., brl: ... }, ... }
   let ratesSecondary = {};
   let cdiRate = null;
   let selicRate = null;
+  let ipcaRate = null;
 
   // ──────────────────────── DOM REFS ────────────────────────
   const $ = (sel) => document.querySelector(sel);
@@ -49,6 +51,7 @@
   const ciPeriod = $('#ci-period');
   const ciPeriodUnit = $('#ci-period-unit');
   const ciCompound = $('#ci-compound');
+  const ciInflation = $('#ci-inflation');
   const ciCalculate = $('#ci-calculate');
 
   // Currency analysis
@@ -63,6 +66,241 @@
 
   let currentMode = 'projection'; // 'projection' or 'historical'
   const historicalRatesCache = {}; // keyed by 'YYYY-MM-DD'
+
+  let lastRateAutoInfo = null;
+
+  // ──────────────────────── TRANSLATIONS ────────────────────────
+  const LANG_KEY = 'fincalc_lang';
+  let currentLang = localStorage.getItem(LANG_KEY) || 'en';
+
+  const TRANSLATIONS = {
+    en: {
+      pageTitle: 'Currency Converter & Interest Calculator',
+      metaDescription: 'Convert between EUR, USD and BRL with live exchange rates. Calculate compound interest with auto-updated Brazilian CDI and SELIC rates.',
+      navConverter: 'Currency Converter',
+      navInterest: 'Compound Interest',
+      converterTitle: 'Currency Converter',
+      converterSubtitle: 'Live exchange rates from trusted sources',
+      currencyEur: 'Euro',
+      currencyUsd: 'US Dollar',
+      currencyBrl: 'Brazilian Real',
+      fetchingRates: 'Fetching live rates…',
+      rateSources: 'Sources: fawazahmed0 · ExchangeRate-API',
+      lastUpdated: 'Last updated:',
+      compareRevolut: 'Compare on Revolut',
+      quickReference: 'Quick Reference',
+      interestTitle: 'Compound Interest Calculator',
+      interestSubtitle: 'Calculate growth with Brazilian CDI & SELIC rates',
+      labelPrincipal: 'Initial Investment',
+      labelMonthly: 'Monthly Contribution',
+      labelRate: 'Annual Interest Rate (%)',
+      labelInflation: 'Annual Inflation Rate (%)',
+      labelPeriod: 'Period',
+      labelUnit: 'Unit',
+      optYears: 'Years',
+      optMonths: 'Months',
+      labelCompound: 'Compounding Frequency',
+      optDaily: 'Daily',
+      optMonthly: 'Monthly',
+      optQuarterly: 'Quarterly',
+      optSemiAnnually: 'Semi-annually',
+      optAnnually: 'Annually',
+      currencyAnalysis: 'Currency Analysis',
+      modeProjection: 'Projection',
+      modeHistorical: 'Historical',
+      projectionHint: 'Set expected annual BRL change against other currencies. Negative = BRL weakens, Positive = BRL strengthens.',
+      historicalHint: 'Use real historical exchange rates. Pick when your investment started — rates are fetched automatically for each month.',
+      labelFxUsd: '🇺🇸 BRL vs USD (%/yr)',
+      labelFxEur: '🇪🇺 BRL vs EUR (%/yr)',
+      labelStartDate: 'Investment Start Date',
+      btnCalculate: 'Calculate',
+      resultTotal: 'Total Value',
+      resultInvested: 'Total Invested',
+      resultEarnings: 'Interest Earned',
+      resultEffective: 'Effective Rate',
+      ratesNoteProjection: 'Currency conversions use live exchange rates from the Currency Converter tab.',
+      ratesNoteHistorical: 'Using real historical exchange rates from fawazahmed0 API.',
+      monthlyBreakdown: 'Monthly Breakdown',
+      thPeriod: 'Period',
+      thContributions: '🇧🇷 Contributions',
+      thInterest: '🇧🇷 Interest',
+      thBalance: '🇧🇷 Balance',
+      thUsdBalance: '🇺🇸 Balance',
+      thEurBalance: '🇪🇺 Balance',
+      chartInvested: 'Invested',
+      chartBalance: 'Balance',
+      rateAutoTemplate: (name, value, date) =>
+        `Using <span id="rate-auto-name">${name}</span> rate: <span id="rate-auto-value">${value}</span>% (updated <span id="rate-auto-date">${date}</span>)`,
+      fetchingMonthsMsg: (n) => `Fetching rates for ${n} months…`,
+      fetchedMonthsMsg: (done, total) => `Fetched ${done} of ${total} months…`,
+      langToggleTitle: 'Mudar para Português',
+      langLabel: 'PT',
+      langFlag: '🇧🇷',
+      footerHtml: 'Rates are for informational purposes only. <a href="https://www.revolut.com/currency-converter/" target="_blank" rel="noopener noreferrer">Revolut Converter</a> · Data from <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noopener noreferrer">fawazahmed0</a> & <a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener noreferrer">ExchangeRate-API</a> · CDI/SELIC from <a href="https://www.bcb.gov.br/" target="_blank" rel="noopener noreferrer">BCB</a>',
+    },
+    pt: {
+      pageTitle: 'Conversor de Moedas & Calculadora de Juros',
+      metaDescription: 'Converta entre EUR, USD e BRL com taxas de câmbio ao vivo. Calcule juros compostos com taxas CDI e SELIC atualizadas automaticamente.',
+      navConverter: 'Conversor de Moedas',
+      navInterest: 'Juros Compostos',
+      converterTitle: 'Conversor de Moedas',
+      converterSubtitle: 'Taxas de câmbio ao vivo de fontes confiáveis',
+      currencyEur: 'Euro',
+      currencyUsd: 'Dólar Americano',
+      currencyBrl: 'Real Brasileiro',
+      fetchingRates: 'Buscando taxas ao vivo…',
+      rateSources: 'Fontes: fawazahmed0 · ExchangeRate-API',
+      lastUpdated: 'Última atualização:',
+      compareRevolut: 'Comparar no Revolut',
+      quickReference: 'Referência Rápida',
+      interestTitle: 'Calculadora de Juros Compostos',
+      interestSubtitle: 'Calcule o crescimento com taxas CDI e SELIC brasileiras',
+      labelPrincipal: 'Investimento Inicial',
+      labelMonthly: 'Aporte Mensal',
+      labelRate: 'Taxa de Juros Anual (%)',
+      labelInflation: 'Taxa de Inflação Anual (%)',
+      labelPeriod: 'Período',
+      labelUnit: 'Unidade',
+      optYears: 'Anos',
+      optMonths: 'Meses',
+      labelCompound: 'Frequência de Capitalização',
+      optDaily: 'Diário',
+      optMonthly: 'Mensal',
+      optQuarterly: 'Trimestral',
+      optSemiAnnually: 'Semestral',
+      optAnnually: 'Anual',
+      currencyAnalysis: 'Análise Cambial',
+      modeProjection: 'Projeção',
+      modeHistorical: 'Histórico',
+      projectionHint: 'Defina a variação anual esperada do BRL em relação a outras moedas. Negativo = BRL enfraquece, Positivo = BRL fortalece.',
+      historicalHint: 'Use taxas de câmbio históricas reais. Escolha quando seu investimento começou — as taxas são buscadas automaticamente para cada mês.',
+      labelFxUsd: '🇺🇸 BRL vs USD (%/ano)',
+      labelFxEur: '🇪🇺 BRL vs EUR (%/ano)',
+      labelStartDate: 'Data de Início do Investimento',
+      btnCalculate: 'Calcular',
+      resultTotal: 'Valor Total',
+      resultInvested: 'Total Investido',
+      resultEarnings: 'Juros Acumulados',
+      resultEffective: 'Taxa Efetiva',
+      ratesNoteProjection: 'Conversões de moeda usam taxas ao vivo da aba Conversor de Moedas.',
+      ratesNoteHistorical: 'Usando taxas de câmbio históricas reais da API fawazahmed0.',
+      monthlyBreakdown: 'Detalhamento Mensal',
+      thPeriod: 'Período',
+      thContributions: '🇧🇷 Aportes',
+      thInterest: '🇧🇷 Juros',
+      thBalance: '🇧🇷 Saldo',
+      thUsdBalance: '🇺🇸 Saldo',
+      thEurBalance: '🇪🇺 Saldo',
+      chartInvested: 'Investido',
+      chartBalance: 'Saldo',
+      rateAutoTemplate: (name, value, date) =>
+        `Usando taxa <span id="rate-auto-name">${name}</span>: <span id="rate-auto-value">${value}</span>% (atualizado em <span id="rate-auto-date">${date}</span>)`,
+      fetchingMonthsMsg: (n) => `Buscando taxas para ${n} meses…`,
+      fetchedMonthsMsg: (done, total) => `Buscado ${done} de ${total} meses…`,
+      langToggleTitle: 'Switch to English',
+      langLabel: 'EN',
+      langFlag: '🇬🇧',
+      footerHtml: 'As taxas são apenas para fins informativos. <a href="https://www.revolut.com/currency-converter/" target="_blank" rel="noopener noreferrer">Conversor Revolut</a> · Dados de <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noopener noreferrer">fawazahmed0</a> & <a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener noreferrer">ExchangeRate-API</a> · CDI/SELIC do <a href="https://www.bcb.gov.br/" target="_blank" rel="noopener noreferrer">BCB</a>',
+    },
+  };
+
+  function applyLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem(LANG_KEY, lang);
+    const t = TRANSLATIONS[lang];
+
+    document.title = t.pageTitle;
+    document.querySelector('meta[name="description"]').content = t.metaDescription;
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+
+    // Toggle button
+    $('#lang-flag').textContent = t.langFlag;
+    $('#lang-label').textContent = t.langLabel;
+    $('#lang-toggle').title = t.langToggleTitle;
+
+    // Nav
+    $('[data-section="converter"]').textContent = t.navConverter;
+    $('[data-section="interest"]').textContent = t.navInterest;
+
+    // Converter
+    $('#converter .section-header h1').textContent = t.converterTitle;
+    $('#converter .section-header .subtitle').textContent = t.converterSubtitle;
+    $('.currency-row[data-currency="eur"] .currency-name').textContent = t.currencyEur;
+    $('.currency-row[data-currency="usd"] .currency-name').textContent = t.currencyUsd;
+    $('.currency-row[data-currency="brl"] .currency-name').textContent = t.currencyBrl;
+    $('#rate-loading span').textContent = t.fetchingRates;
+    $('.rate-source').textContent = t.rateSources;
+    $('#last-updated-label').textContent = t.lastUpdated;
+    $('#revolut-text').textContent = t.compareRevolut;
+    $('.quick-table h2').textContent = t.quickReference;
+
+    // Interest labels
+    $('#interest .section-header h1').textContent = t.interestTitle;
+    $('#interest .section-header .subtitle').textContent = t.interestSubtitle;
+    $('label[for="ci-principal"]').textContent = t.labelPrincipal;
+    $('label[for="ci-monthly"]').textContent = t.labelMonthly;
+    $('label[for="ci-rate"]').textContent = t.labelRate;
+    $('label[for="ci-inflation"]').textContent = t.labelInflation;
+    $('label[for="ci-period"]').textContent = t.labelPeriod;
+    $('label[for="ci-period-unit"]').textContent = t.labelUnit;
+    $('label[for="ci-compound"]').textContent = t.labelCompound;
+    $('label[for="ci-fx-usd"]').textContent = t.labelFxUsd;
+    $('label[for="ci-fx-eur"]').textContent = t.labelFxEur;
+    $('label[for="ci-start-date"]').textContent = t.labelStartDate;
+
+    // Select options
+    const pu = $('#ci-period-unit');
+    pu.options[0].textContent = t.optYears;
+    pu.options[1].textContent = t.optMonths;
+    const cf = $('#ci-compound');
+    cf.options[0].textContent = t.optDaily;
+    cf.options[1].textContent = t.optMonthly;
+    cf.options[2].textContent = t.optQuarterly;
+    cf.options[3].textContent = t.optSemiAnnually;
+    cf.options[4].textContent = t.optAnnually;
+
+    // Buttons & hints
+    $('#currency-analysis-text').textContent = t.currencyAnalysis;
+    $('#mode-projection-text').textContent = t.modeProjection;
+    $('#mode-historical-text').textContent = t.modeHistorical;
+    $('#calculate-text').textContent = t.btnCalculate;
+    $('#mode-projection .projection-hint').textContent = t.projectionHint;
+    $('#mode-historical .projection-hint').textContent = t.historicalHint;
+
+    // Results
+    $('#ci-total').previousElementSibling.textContent = t.resultTotal;
+    $('#ci-invested').previousElementSibling.textContent = t.resultInvested;
+    $('#ci-earnings').previousElementSibling.textContent = t.resultEarnings;
+    $('#ci-effective').previousElementSibling.textContent = t.resultEffective;
+
+    // Breakdown table
+    $('.breakdown-table-wrapper h3').textContent = t.monthlyBreakdown;
+    const ths = $$('#ci-breakdown-table th');
+    if (ths.length >= 6) {
+      ths[0].textContent = t.thPeriod;
+      ths[1].textContent = t.thContributions;
+      ths[2].textContent = t.thInterest;
+      ths[3].textContent = t.thBalance;
+      ths[4].textContent = t.thUsdBalance;
+      ths[5].textContent = t.thEurBalance;
+    }
+
+    // Rate auto info (re-render if visible)
+    if (lastRateAutoInfo) {
+      const info = $('#rate-auto-info');
+      if (!info.classList.contains('hidden')) {
+        info.innerHTML = t.rateAutoTemplate(lastRateAutoInfo.name, lastRateAutoInfo.value, lastRateAutoInfo.date);
+      }
+    }
+
+    // Footer
+    $('#footer-text').innerHTML = t.footerHtml;
+
+    // Re-draw chart with translated labels if interest tab is active
+    if ($('#interest').classList.contains('active')) {
+      calculateCompoundInterest();
+    }
+  }
 
   // ──────────────────────── NAV ────────────────────────
   $$('.nav-link').forEach((link) => {
@@ -254,7 +492,11 @@
 
   async function loadBrazilianRates() {
     try {
-      const [cdiRes, selicRes] = await Promise.all([fetch(BCB_CDI), fetch(BCB_SELIC)]);
+      const [cdiRes, selicRes, ipcaRes] = await Promise.all([
+        fetch(BCB_CDI),
+        fetch(BCB_SELIC),
+        fetch(BCB_IPCA)
+      ]);
 
       if (cdiRes.ok) {
         const cdiData = await cdiRes.json();
@@ -275,6 +517,15 @@
           $('#btn-selic-rate').textContent = `${annualised.toFixed(1)}%`;
         }
       }
+
+      if (ipcaRes.ok) {
+        const ipcaData = await ipcaRes.json();
+        if (ipcaData.length) {
+          const val = parseFloat(ipcaData[0].valor);
+          ipcaRate = { annualised: val, date: ipcaData[0].data };
+          $('#btn-ipca-rate').textContent = `${val.toFixed(2)}%`;
+        }
+      }
     } catch (err) {
       console.warn('BCB API error:', err);
     }
@@ -292,12 +543,17 @@
     showRateAutoInfo('SELIC', selicRate.annualised.toFixed(2), selicRate.date);
   });
 
+  $('#btn-ipca').addEventListener('click', () => {
+    if (!ipcaRate) return;
+    ciInflation.value = ipcaRate.annualised.toFixed(2);
+    // Don't show rate auto info for inflation, to avoid overriding the interest rate info
+  });
+
   function showRateAutoInfo(name, value, date) {
+    lastRateAutoInfo = { name, value, date };
     const info = $('#rate-auto-info');
     info.classList.remove('hidden');
-    $('#rate-auto-name').textContent = name;
-    $('#rate-auto-value').textContent = value;
-    $('#rate-auto-date').textContent = date;
+    info.innerHTML = TRANSLATIONS[currentLang].rateAutoTemplate(name, value, date);
   }
 
   // ──────────────────────── CURRENCY ANALYSIS TOGGLE ────────────────────────
@@ -375,7 +631,7 @@
     }
 
     historicalStatus.classList.remove('hidden');
-    historicalStatusText.textContent = `Fetching rates for ${dates.length} months…`;
+    historicalStatusText.textContent = TRANSLATIONS[currentLang].fetchingMonthsMsg(dates.length);
 
     // Fetch in batches of 6 to avoid overwhelming the API
     const results = [];
@@ -384,7 +640,7 @@
       const batch = dates.slice(i, i + batchSize);
       const batchResults = await Promise.all(batch.map(fetchHistoricalRate));
       results.push(...batchResults);
-      historicalStatusText.textContent = `Fetched ${results.length} of ${dates.length} months…`;
+      historicalStatusText.textContent = TRANSLATIONS[currentLang].fetchedMonthsMsg(results.length, dates.length);
     }
 
     historicalStatus.classList.add('hidden');
@@ -397,7 +653,14 @@
     const P = parseFloat(ciPrincipal.value) || 0;
     const PMT = parseFloat(ciMonthly.value) || 0;
     const annualRate = parseFloat(ciRate.value) || 0;
-    const r = annualRate / 100;
+    const annualInflation = parseFloat(ciInflation.value) || 0;
+    
+    let r = annualRate / 100;
+    if (annualInflation > 0) {
+      const i = annualInflation / 100;
+      r = ((1 + r) / (1 + i)) - 1; // Real interest rate formula
+    }
+
     const n = parseInt(ciCompound.value, 10);
     let totalMonths;
 
@@ -528,8 +791,8 @@
       $('#ci-earnings-usd').innerHTML = `<span class="cur-flag">🇺🇸</span> ${formatUSD(earningsUsd)}`;
       $('#ci-earnings-eur').innerHTML = `<span class="cur-flag">🇪🇺</span> ${formatEUR(earningsEur)}`;
       const noteText = isHistorical
-        ? 'Using real historical exchange rates from fawazahmed0 API.'
-        : 'Currency conversions use live exchange rates from the Currency Converter tab.';
+        ? TRANSLATIONS[currentLang].ratesNoteHistorical
+        : TRANSLATIONS[currentLang].ratesNoteProjection;
       $('#ci-rates-note').querySelector('span').textContent = noteText;
       $('#ci-rates-note').classList.remove('hidden');
     } else {
@@ -752,7 +1015,7 @@
     ctx.fill();
     ctx.fillStyle = '#94a3b8';
     ctx.textAlign = 'left';
-    ctx.fillText('Invested', W / 2 - 84, legendY);
+    ctx.fillText(TRANSLATIONS[currentLang].chartInvested, W / 2 - 84, legendY);
 
     // Balance
     ctx.beginPath();
@@ -766,7 +1029,7 @@
     ctx.fillStyle = '#10b981';
     ctx.fill();
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('Balance', W / 2 + 36, legendY);
+    ctx.fillText(TRANSLATIONS[currentLang].chartBalance, W / 2 + 36, legendY);
   }
 
   function abbreviateNumber(n) {
@@ -780,14 +1043,20 @@
   ciCalculate.addEventListener('click', calculateCompoundInterest);
 
   // Also calc on enter key
-  [ciPrincipal, ciMonthly, ciRate, ciPeriod, ciFxUsd, ciFxEur].forEach((input) => {
+  [ciPrincipal, ciMonthly, ciRate, ciInflation, ciPeriod, ciFxUsd, ciFxEur].forEach((input) => {
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') calculateCompoundInterest();
     });
+  });
+
+  // Language toggle
+  $('#lang-toggle').addEventListener('click', () => {
+    applyLanguage(currentLang === 'en' ? 'pt' : 'en');
   });
 
   // Boot
   loadRates();
   loadBrazilianRates();
   calculateCompoundInterest();
+  applyLanguage(currentLang);
 })();

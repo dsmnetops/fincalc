@@ -33,6 +33,10 @@
       <a href="#converter" class="nav-link active" data-section="converter">Currency Converter</a>
       <a href="#interest" class="nav-link" data-section="interest">Compound Interest</a>
     </nav>
+    <button class="lang-toggle" id="lang-toggle" title="Mudar para Português" aria-label="Switch language">
+      <span id="lang-flag">🇧🇷</span>
+      <span id="lang-label">PT</span>
+    </button>
   </header>
 
   <main>
@@ -104,7 +108,7 @@
             </div>
           </div>
           <div id="rate-updated" class="rate-updated hidden">
-            Last updated: <span id="rate-timestamp">—</span>
+            <span id="last-updated-label">Last updated:</span> <span id="rate-timestamp">—</span>
           </div>
         </div>
 
@@ -115,7 +119,7 @@
               <polyline points="15 3 21 3 21 9"/>
               <line x1="10" y1="14" x2="21" y2="3"/>
             </svg>
-            Compare on Revolut
+            <span id="revolut-text">Compare on Revolut</span>
           </a>
         </div>
       </div>
@@ -185,6 +189,19 @@
             </div>
           </div>
 
+          <div class="input-group">
+            <label for="ci-inflation">Annual Inflation Rate (%)</label>
+            <div class="rate-input-row">
+              <input type="number" id="ci-inflation" value="0" min="0" max="100" step="0.01">
+              <div class="rate-buttons">
+                <button class="rate-preset-btn" id="btn-ipca" title="Use current IPCA rate">
+                  <span class="btn-label">IPCA</span>
+                  <span class="btn-rate" id="btn-ipca-rate">…</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div class="input-row-2col">
             <div class="input-group">
               <label for="ci-period">Period</label>
@@ -216,18 +233,18 @@
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
                 <polyline points="17 6 23 6 23 12"/>
               </svg>
-              Currency Analysis
+              <span id="currency-analysis-text">Currency Analysis</span>
               <span class="toggle-chevron" id="toggle-chevron">▸</span>
             </button>
             <div class="projection-panel hidden" id="projection-panel">
               <div class="mode-toggle" id="mode-toggle">
                 <button type="button" class="mode-btn active" data-mode="projection">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-                  Projection
+                  <span id="mode-projection-text">Projection</span>
                 </button>
                 <button type="button" class="mode-btn" data-mode="historical">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  Historical
+                  <span id="mode-historical-text">Historical</span>
                 </button>
               </div>
 
@@ -280,7 +297,7 @@
               <line x1="8" y1="18" x2="8" y2="18.01"/>
               <line x1="12" y1="18" x2="12" y2="18.01"/>
             </svg>
-            Calculate
+            <span id="calculate-text">Calculate</span>
           </button>
         </div>
 
@@ -352,7 +369,7 @@
   </main>
 
   <footer>
-    <p>Rates are for informational purposes only. <a href="https://www.revolut.com/currency-converter/" target="_blank" rel="noopener noreferrer">Revolut Converter</a> · Data from <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noopener noreferrer">fawazahmed0</a> & <a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener noreferrer">ExchangeRate-API</a> · CDI/SELIC from <a href="https://www.bcb.gov.br/" target="_blank" rel="noopener noreferrer">BCB</a></p>
+    <p id="footer-text">Rates are for informational purposes only. <a href="https://www.revolut.com/currency-converter/" target="_blank" rel="noopener noreferrer">Revolut Converter</a> · Data from <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noopener noreferrer">fawazahmed0</a> & <a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener noreferrer">ExchangeRate-API</a> · CDI/SELIC from <a href="https://www.bcb.gov.br/" target="_blank" rel="noopener noreferrer">BCB</a></p>
   </footer>
 
   <script src="app.js"></script>
