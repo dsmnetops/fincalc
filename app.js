@@ -401,12 +401,12 @@
   }
 
   // ──────────────────────── NAV ────────────────────────
-  $$('.nav-btn').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
+  $$('.nav-link').forEach((link) => {
+    link.addEventListener('click', (e) => {
       e.preventDefault();
-      const target = btn.dataset.section;
-      $$('.nav-btn').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
+      const target = link.dataset.section;
+      $$('.nav-link').forEach((b) => b.classList.remove('active'));
+      link.classList.add('active');
       $$('.section').forEach((s) => s.classList.remove('active'));
       $(`#${target}`).classList.add('active');
       // Re-draw chart when interest section becomes visible
@@ -1271,12 +1271,10 @@
         const cls = diff >= 0 ? 'positive' : 'negative';
         
         let eurPrice = '—', brlPrice = '—';
-        if (exchangeRates && exchangeRates.usd) {
-           const valEur = data.price * exchangeRates.usd.eur;
-           const valBrl = data.price * exchangeRates.usd.brl;
-           eurPrice = '€' + valEur.toFixed(2);
-           brlPrice = 'R$' + valBrl.toFixed(2);
-        }
+        const rateEur = getRate('usd', 'eur');
+        const rateBrl = getRate('usd', 'brl');
+        if (rateEur) eurPrice = '€' + (data.price * rateEur).toFixed(2);
+        if (rateBrl) brlPrice = 'R$' + (data.price * rateBrl).toFixed(2);
 
         htmls.push(`
           <div class="tracker-card">
@@ -1320,11 +1318,11 @@
       if (data) {
         const totalUsd = data.price * shares;
         let totalEur = 0, totalBrl = 0;
+        const rateEur = getRate('usd', 'eur');
+        const rateBrl = getRate('usd', 'brl');
         
-        if (exchangeRates && exchangeRates.usd) {
-          totalEur = totalUsd * exchangeRates.usd.eur;
-          totalBrl = totalUsd * exchangeRates.usd.brl;
-        }
+        if (rateEur) totalEur = totalUsd * rateEur;
+        if (rateBrl) totalBrl = totalUsd * rateBrl;
         
         stockSimName.textContent = `${shares}x ${data.name || symbol}`;
         stockSimPrice.textContent = `$${data.price.toFixed(2)}`;
@@ -1349,11 +1347,16 @@
 
       let stockEur = 0, stockBrl = 0;
       let interestEur = 0, interestBrl = 0;
-      if (exchangeRates && exchangeRates.usd) {
-        stockEur = futureStockUsd * exchangeRates.usd.eur;
-        stockBrl = futureStockUsd * exchangeRates.usd.brl;
-        interestEur = futureInterestUsd * exchangeRates.usd.eur;
-        interestBrl = futureInterestUsd * exchangeRates.usd.brl;
+      const rateEur = getRate('usd', 'eur');
+      const rateBrl = getRate('usd', 'brl');
+      
+      if (rateEur) {
+        stockEur = futureStockUsd * rateEur;
+        interestEur = futureInterestUsd * rateEur;
+      }
+      if (rateBrl) {
+        stockBrl = futureStockUsd * rateBrl;
+        interestBrl = futureInterestUsd * rateBrl;
       }
 
       compStockUsd.textContent = `$${formatUSD(futureStockUsd).replace('$', '')}`;
